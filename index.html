@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Shop Stock Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a73e8 0%, #6c1ce8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a73e8 0%, #6c1ce8 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .currency-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 18px;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 4px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom: 4px solid #1a73e8;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a73e8 0%, #6c1ce8 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .stat-card p {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .quick-actions {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 18px;
+            background: white;
+            border: 2px solid #1a73e8;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background: #1a73e8;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+        }
+
+        .low-stock-alert {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .low-stock-alert h3 {
+            color: #e17055;
+            margin-bottom: 15px;
+        }
+
+        .stock-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 18px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            border: 2px solid #f1f2f6;
+            transition: all 0.3s;
+        }
+
+        .stock-item:hover {
+            border-color: #1a73e8;
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.1);
+        }
+
+        .stock-item.low {
+            border-left: 6px solid #e17055;
+            background: #fff3cd;
+        }
+
+        .stock-item.ok {
+            border-left: 6px solid #00b894;
+        }
+
+        .color-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 12px;
+            vertical-align: middle;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .form-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .form-box h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .toggle-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .toggle-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #1a73e8 0%, #6c1ce8 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1a73e8 0%, #6c1ce8 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        .submit-btn.secondary {
+            background: linear-gradient(135deg, #34a853 0%, #2e7d32 100%);
+        }
+
+        .backup-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .backup-btn {
+            padding: 15px;
+            background: white;
+            border: 2px solid #1a73e8;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .backup-btn:hover {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .backup-btn.danger {
+            border-color: #e17055;
+            color: #e17055;
+        }
+
+        .backup-btn.danger:hover {
+            background: #e17055;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #2d3436;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .search-bar {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input,
+        .search-bar select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .reorder-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .supplier-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .supplier-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stock-item,
+            .reorder-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .backup-section {
+                grid-template-columns: 1fr;
+            }
+
+            .tab {
+                padding: 15px;
+            }
+
+            .form-container {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🛍️ KWELL EVENTS Stock</h1>
+            <div class="currency-selector">
+                <strong>Currency:</strong> KSH 🇰🇪
+            </div>
+            <div class="status">
+                <span id="connectionStatus">✅ Online</span>
+                <span id="lastSaved">Saved: Just now</span>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('stock')">📦 Stock</button>
+            <button class="tab" onclick="showTab('add')">➕ Add/Remove</button>
+            <button class="tab" onclick="showTab('newitem')">🆕 New Item</button>
+            <button class="tab" onclick="showTab('reorder')">⚠️ Reorder</button>
+            <button class="tab" onclick="showTab('edititem')">✏️ Edit Items</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Items</h3>
+                    <p id="totalItems">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Low Stock</h3>
+                    <p id="lowStockCount">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Stock Value</h3>
+                    <p id="stockValue">KSH 0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Today's Sales</h3>
+                    <p id="todaySales">0</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-grid">
+                    <button onclick="sellQuick('Oasis')" class="action-btn">
+                        Sell Oasis
+                    </button>
+                    <button onclick="sellQuick('ribbon')" class="action-btn">
+                        Sell Ribbon
+                    </button>
+                    <button onclick="sellQuick('balloon')" class="action-btn">
+                        Sell Balloon
+                    </button>
+                    <button onclick="sellQuick('card')" class="action-btn">
+                        Sell Card
+                    </button>
+                </div>
+            </div>
+
+            <div class="low-stock-alert" id="lowStockAlert" style="display: none;">
+                <h3>⚠️ Low Stock Items</h3>
+                <div id="lowStockList"></div>
+            </div>
+        </div>
+
+        <!-- Stock View Tab -->
+        <div id="stock" class="tab-content">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Search items..." onkeyup="searchItems()">
+                <select id="categoryFilter" onchange="filterByCategory()">
+                    <option value="all">All Categories</option>
+                    <option value="ribbon">Ribbons</option>
+                    <option value="balloon">Balloons</option>
+                    <option value="card">Cards</option>
+                    <option value="Gift box">Gift box</option>
+                    <option value="Oasis">Oasis</option>
+                    <option value="lights">lights</option>
+                </select>
+            </div>
+
+            <div class="stock-list" id="stockList">
+                <!-- Items loaded here -->
+            </div>
+        </div>
+
+        <!-- Add/Remove Tab -->
+        <div id="add" class="tab-content">
+            <div class="form-container">
+                <div class="form-box">
+                    <h3>Add or Remove Stock</h3>
+
+                    <div class="form-group">
+                        <label>Select Item:</label>
+                        <select id="itemSelect" onchange="updateItemDetails()">
+                            <option value="">-- Choose Item --</option>
+                        </select>
+                    </div>
+
+                    <div id="itemDetails" class="item-details"
+                        style="display: none; padding: 15px; background: white; border-radius: 8px; margin: 15px 0; border: 2px solid #1a73e8;">
+                        <p><strong>Current Stock:</strong> <span id="currentStock">0</span></p>
+                        <p><strong>Min Stock:</strong> <span id="minStock">0</span></p>
+                        <p><strong>Value:</strong> <span id="itemValue">KSH 0</span></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Transaction Type:</label>
+                        <div class="toggle-buttons">
+                            <button id="btnIn" class="toggle-btn active" onclick="setTransactionType('in')">➕ Incoming
+                                Stock</button>
+                            <button id="btnOut" class="toggle-btn" onclick="setTransactionType('out')">➖ Sell
+                                Stock</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quantity:</label>
+                        <input type="number" id="quantity" min="1" value="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes (Optional):</label>
+                        <input type="text" id="notes" placeholder="e.g., Supplier delivery, Customer sale">
+                    </div>
+
+                    <button onclick="processTransaction()" class="submit-btn">💾 Save Transaction</button>
+                </div>
+
+                <div class="form-box">
+                    <h3>Recent Transactions</h3>
+                    <div id="recentTransactions" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Transactions loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Item Tab -->
+        <div id="newitem" class="tab-content">
+            <div class="form-container">
+                <div class="form-box">
+                    <h3>➕ Add New Item</h3>
+
+                    <div class="form-group">
+                        <label>Item Name:</label>
+                        <input type="text" id="newItemName" placeholder="e.g., Teal Blue Ribbon">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category:</label>
+                        <select id="newItemCategory">
+                            <option value="ribbon">Ribbon</option>
+                            <option value="balloon">Balloon</option>
+                            <option value="card">Card</option>
+                            <option value="oasis">Oasis</option>
+                            <option value="Christmas lights">Christmas lights</option>
+                            <option value="Gift box">Gift box</option>
+                            <option value="Gift bag">Gift bag</option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Color Code (Optional):</label>
+                        <input type="color" id="newItemColor" value="#6c757d">
+                        <small>Click to choose color</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Unit:</label>
+                        <select id="newItemUnit">
+                            <option value="roll">Roll</option>
+                            <option value="pack">Pack</option>
+                            <option value="each">Each</option>
+                            <option value="meter">Meter</option>
+                            <option value="piece">Piece</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Price (KSH):</label>
+                        <input type="number" id="newItemPrice" min="0" step="10" value="100" placeholder="Price in KSH">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Initial Stock:</label>
+                        <input type="number" id="newItemStock" min="0" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Min Stock (Reorder Point):</label>
+                        <input type="number" id="newItemMinStock" min="0" value="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reorder Quantity:</label>
+                        <input type="number" id="newItemReorderQty" min="1" value="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Supplier (Optional):</label>
+                        <input type="text" id="newItemSupplier" placeholder="Supplier name">
+                    </div>
+
+                    <button onclick="addNewItem()" class="submit-btn secondary">➕ Add New Item</button>
+                </div>
+
+                <div class="form-box">
+                    <h3>💡 Tips</h3>
+                    <ul style="padding-left: 20px; margin-top: 15px;">
+                        <li><strong>For Ribbons:</strong> Use color picker for exact shade</li>
+                        <li><strong>Min Stock:</strong> When stock reaches this, you'll be alerted</li>
+                        <li><strong>Reorder Quantity:</strong> How many to order when low</li>
+                        <li><strong>Price:</strong> Enter in Kenyan Shillings (KSH)</li>
+                        <li><strong>Units:</strong> Use "roll" for ribbons, "pack" for balloons</li>
+                    </ul>
+
+                    <h3 style="margin-top: 30px;">📝 Quick Add Templates</h3>
+                    <div class="action-grid" style="margin-top: 15px;">
+                        <button onclick="fillTemplate('ribbon')" class="action-btn">Add Ribbon</button>
+                        <button onclick="fillTemplate('balloon')" class="action-btn">Add Balloon</button>
+                        <button onclick="fillTemplate('card')" class="action-btn">Add Card</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Edit Item Tab -->
+        <div id="edititem" class="tab-content">
+            <div class="form-container">
+                <div class="form-box">
+                    <h3>✏️ Edit Existing Item</h3>
+
+                    <div class="form-group">
+                        <label>Search Item to Edit:</label>
+                        <select id="editItemSelect" onchange="loadItemForEdit()">
+                            <option value="">-- Select Item to Edit --</option>
+                        </select>
+                    </div>
+
+                    <div id="editItemForm" style="display: none;">
+                        <div class="form-group">
+                            <label>Item Name:</label>
+                            <input type="text" id="editItemName" placeholder="Item name">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Category:</label>
+                            <select id="editItemCategory">
+                                <option value="ribbon">Ribbon</option>
+                                <option value="balloon">Balloon</option>
+                                <option value="card">Card</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color:</label>
+                            <input type="color" id="editItemColor">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Unit:</label>
+                            <select id="editItemUnit">
+                                <option value="roll">Roll</option>
+                                <option value="pack">Pack</option>
+                                <option value="each">Each</option>
+                                <option value="meter">Meter</option>
+                                <option value="piece">Piece</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Price (KSH):</label>
+                            <input type="number" id="editItemPrice" min="0" step="10" placeholder="Price in KSH">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Current Stock:</label>
+                            <input type="number" id="editItemStock" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Min Stock (Reorder Point):</label>
+                            <input type="number" id="editItemMinStock" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reorder Quantity:</label>
+                            <input type="number" id="editItemReorderQty" min="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Supplier:</label>
+                            <input type="text" id="editItemSupplier" placeholder="Supplier name">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Item ID (Cannot change):</label>
+                            <input type="text" id="editItemId" disabled style="background: #f0f0f0;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                            <button onclick="updateItem()" class="submit-btn">💾 Save Changes</button>
+                            <button onclick="deleteItem()" class="backup-btn danger"
+                                style="padding: 18px; width: 100%;">🗑️ Delete Item</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-box">
+                    <h3>📊 Item Statistics</h3>
+                    <div id="itemStats" style="padding: 20px; background: white; border-radius: 8px;">
+                        <p>Select an item to see statistics</p>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">💡 Quick Price Update</h3>
+                    <div class="form-group">
+                        <label>Increase All Prices by (%):</label>
+                        <input type="number" id="priceIncrease" min="0" max="100" value="10" style="width: 100px;">
+                        <button onclick="increaseAllPrices()"
+                            style="padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; margin-left: 10px;">Apply</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Update Category Prices:</label>
+                        <select id="updateCategory" style="width: 150px;">
+                            <option value="ribbon">Ribbons</option>
+                            <option value="balloon">Balloons</option>
+                            <option value="card">Cards</option>
+                        </select>
+                        <input type="number" id="newCategoryPrice" placeholder="New price"
+                            style="width: 120px; margin-left: 10px;">
+                        <button onclick="updateCategoryPrices()"
+                            style="padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 4px; margin-left: 10px;">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Reorder Tab -->
+        <div id="reorder" class="tab-content">
+            <div class="reorder-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📋 Reorder List</h2>
+                <button onclick="printReorderList()" class="submit-btn" style="width: auto; padding: 12px 25px;">🖨️
+                    Print List</button>
+            </div>
+
+            <div id="reorderList">
+                <!-- Reorder items loaded here -->
+            </div>
+
+
+
+            <!-- Backup Section -->
+            <div class="backup-section">
+                <button onclick="exportData()" class="backup-btn">📥 Export Data</button>
+                <button onclick="importData()" class="backup-btn">📤 Import Data</button>
+                <button onclick="clearData()" class="backup-btn danger">🗑️ Clear All Data</button>
+                <input type="file" id="importFile" style="display: none;" accept=".json">
+            </div>
+
+            <footer>
+                <p>🛍️ KWELL EVENTS Stock Manager | Currency: KSH 🇰🇪 | Works 100% Offline</p>
+            </footer>
+        </div>
+
+        <script>
+            // Stock data - NOW WITH KSH CURRENCY
+            let stockDB = {
+                currency: 'KSH',
+                products: [
+
+
+                ],
+                transactions: []
+            };
+
+            // Load saved data
+            function loadData() {
+                const saved = localStorage.getItem('myShopStockKSH');
+                if (saved) {
+                    try {
+                        stockDB = JSON.parse(saved);
+                        if (!stockDB.currency) stockDB.currency = 'KSH';
+                    } catch (e) {
+                        console.log('Using default data with KSH');
+                    }
+                }
+            }
+
+            // Save data
+            function saveData() {
+                localStorage.setItem('myShopStockKSH', JSON.stringify(stockDB));
+                updateLastSaved();
+            }
+
+            // Update last saved time
+            function updateLastSaved() {
+                const now = new Date();
+                document.getElementById('lastSaved').textContent =
+                    `Saved: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            }
+
+            // Format KSH currency
+            function formatKSH(amount) {
+                return `KSH ${amount.toLocaleString('en-KE')}`;
+            }
+
+            // Tab switching
+            function showTab(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Remove active from buttons
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Show selected tab
+                document.getElementById(tabName).classList.add('active');
+
+                // Make button active
+                event.target.classList.add('active');
+
+                // Update content
+                if (tabName === 'dashboard') {
+                    updateDashboard();
+                } else if (tabName === 'stock') {
+                    loadStockList();
+                    populateItemSelect();
+                } else if (tabName === 'add') {
+                    populateItemSelect();
+                    loadRecentTransactions();
+                } else if (tabName === 'newitem') {
+                    // Nothing special for new item tab
+                } else if (tabName === 'reorder') {
+                    updateReorderList();
+                }
+            }
+
+            // Populate item select dropdown
+            function populateItemSelect() {
+                const select = document.getElementById('itemSelect');
+                select.innerHTML = '<option value="">-- Choose Item --</option>' +
+                    stockDB.products.map(item => `
+                    <option value="${item.id}">${item.name}</option>
+                `).join('');
+            }
+
+            // Update dashboard
+            function updateDashboard() {
+                const totalItems = stockDB.products.reduce((sum, item) => sum + item.currentStock, 0);
+                const lowStockCount = stockDB.products.filter(item => item.currentStock <= item.minStock).length;
+                const stockValue = stockDB.products.reduce((sum, item) => sum + (item.currentStock * item.price), 0);
+
+                // Calculate today's sales
+                const today = new Date().toDateString();
+                const todaySales = stockDB.transactions
+                    .filter(t => new Date(t.date).toDateString() === today && t.type === 'out')
+                    .reduce((sum, t) => sum + t.quantity, 0);
+
+                document.getElementById('totalItems').textContent = totalItems.toLocaleString();
+                document.getElementById('lowStockCount').textContent = lowStockCount;
+                document.getElementById('stockValue').textContent = formatKSH(stockValue);
+                document.getElementById('todaySales').textContent = todaySales;
+
+                // Check low stock
+                checkLowStock();
+            }
+
+            // Check low stock
+            function checkLowStock() {
+                const lowStockItems = stockDB.products.filter(item => item.currentStock <= item.minStock);
+                const alertDiv = document.getElementById('lowStockAlert');
+                const listDiv = document.getElementById('lowStockList');
+
+                if (lowStockItems.length === 0) {
+                    alertDiv.style.display = 'none';
+                    return;
+                }
+
+                alertDiv.style.display = 'block';
+                listDiv.innerHTML = lowStockItems.map(item => `
+                <div class="stock-item low">
+                    <div>
+                        <span class="color-indicator" style="background:${item.color}"></span>
+                        ${item.name}
+                    </div>
+                    <div>${item.currentStock} ${item.unit}</div>
+                    <div>Min: ${item.minStock}</div>
+                    <div>${formatKSH(item.price)} each</div>
+                    <div><strong>Order ${item.reorderQty}</strong></div>
+                </div>
+            `).join('');
+            }
+
+            // Load stock list
+            function loadStockList() {
+                const listDiv = document.getElementById('stockList');
+                listDiv.innerHTML = stockDB.products.map(item => `
+                <div class="stock-item ${item.currentStock <= item.minStock ? 'low' : 'ok'}">
+                    <div>
+                        <span class="color-indicator ${item.id}"></span>
+                        <strong>${item.name}</strong>
+                        <br><small>${item.category} • ${item.unit}</small>
+                    </div>
+                    <div>${item.currentStock} ${item.unit}</div>
+                    <div>Min: ${item.minStock}</div>
+                    <div>${formatKSH(item.price)} each</div>
+                    <div><strong>${formatKSH(item.price * item.currentStock)}</strong></div>
+                </div>
+            `).join('');
+            }
+
+            // Search items
+            function searchItems() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = stockDB.products.filter(item =>
+                    item.name.toLowerCase().includes(searchTerm) ||
+                    item.category.toLowerCase().includes(searchTerm)
+                );
+
+                const listDiv = document.getElementById('stockList');
+                listDiv.innerHTML = filtered.map(item => `
+                <div class="stock-item ${item.currentStock <= item.minStock ? 'low' : 'ok'}">
+                    <div>
+                        <span class="color-indicator" style="background:${item.color}"></span>
+                        <strong>${item.name}</strong>
+                        <br><small>${item.category} • ${item.unit}</small>
+                    </div>
+                    <div>${item.currentStock} ${item.unit}</div>
+                    <div>Min: ${item.minStock}</div>
+                    <div>${formatKSH(item.price)} each</div>
+                    <div><strong>${formatKSH(item.price * item.currentStock)}</strong></div>
+                </div>
+            `).join('');
+            }
+
+            // Filter by category
+            function filterByCategory() {
+                const category = document.getElementById('categoryFilter').value;
+                const filtered = category === 'all'
+                    ? stockDB.products
+                    : stockDB.products.filter(item => item.category === category);
+
+                const listDiv = document.getElementById('stockList');
+                listDiv.innerHTML = filtered.map(item => `
+                <div class="stock-item ${item.currentStock <= item.minStock ? 'low' : 'ok'}">
+                    <div>
+                        <span class="color-indicator" style="background:${item.color}"></span>
+                        <strong>${item.name}</strong>
+                        <br><small>${item.category} • ${item.unit}</small>
+                    </div>
+                    <div>${item.currentStock} ${item.unit}</div>
+                    <div>Min: ${item.minStock}</div>
+                    <div>${formatKSH(item.price)} each</div>
+                    <div><strong>${formatKSH(item.price * item.currentStock)}</strong></div>
+                </div>
+            `).join('');
+            }
+
+            // Update item details
+            function updateItemDetails() {
+                const itemId = document.getElementById('itemSelect').value;
+                const detailsDiv = document.getElementById('itemDetails');
+
+                if (!itemId) {
+                    detailsDiv.style.display = 'none';
+                    return;
+                }
+
+                const item = stockDB.products.find(p => p.id === itemId);
+                if (item) {
+                    document.getElementById('currentStock').textContent = `${item.currentStock} ${item.unit}`;
+                    document.getElementById('minStock').textContent = `${item.minStock} ${item.unit}`;
+                    document.getElementById('itemValue').textContent = formatKSH(item.price * item.currentStock);
+                    detailsDiv.style.display = 'block';
+                }
+            }
+
+            // Set transaction type
+            function setTransactionType(type) {
+                document.getElementById('btnIn').classList.toggle('active', type === 'in');
+                document.getElementById('btnOut').classList.toggle('active', type === 'out');
+            }
+
+            // Quick sell
+            function sellQuick(itemId) {
+                const item = stockDB.products.find(p => p.id === itemId);
+                if (!item) return;
+
+                if (item.currentStock <= 0) {
+                    alert(`❌ ${item.name} is out of stock!`);
+                    return;
+                }
+
+                if (confirm(`Sell 1 ${item.unit} of ${item.name} for ${formatKSH(item.price)}?`)) {
+                    item.currentStock -= 1;
+
+                    // Record transaction
+                    stockDB.transactions.unshift({
+                        id: Date.now(),
+                        date: new Date().toISOString(),
+                        itemId: itemId,
+                        itemName: item.name,
+                        type: 'out',
+                        quantity: 1,
+                        price: item.price,
+                        total: item.price,
+                        notes: 'Quick sale'
+                    });
+
+                    saveData();
+                    updateDashboard();
+                    loadStockList();
+                    loadRecentTransactions();
+                    alert(`✅ Sold 1 ${item.unit} of ${item.name} for ${formatKSH(item.price)}`);
+                }
+            }
+
+            // Process transaction
+            function processTransaction() {
+                const itemId = document.getElementById('itemSelect').value;
+                const quantity = parseInt(document.getElementById('quantity').value);
+                const notes = document.getElementById('notes').value;
+                const type = document.getElementById('btnIn').classList.contains('active') ? 'in' : 'out';
+
+                if (!itemId || !quantity || quantity <= 0) {
+                    alert('❌ Please select an item and enter quantity');
+                    return;
+                }
+
+                const item = stockDB.products.find(p => p.id === itemId);
+                if (!item) return;
+
+                if (type === 'in') {
+                    item.currentStock += quantity;
+                } else {
+                    if (item.currentStock < quantity) {
+                        alert(`❌ Not enough stock! Only ${item.currentStock} ${item.unit} available.`);
+                        return;
+                    }
+                    item.currentStock -= quantity;
+                }
+
+                // Record transaction
+                stockDB.transactions.unshift({
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    itemId: itemId,
+                    itemName: item.name,
+                    type: type,
+                    quantity: quantity,
+                    price: item.price,
+                    total: item.price * quantity,
+                    notes: notes,
+                    newStock: item.currentStock
+                });
+
+                saveData();
+                updateDashboard();
+                loadStockList();
+                loadRecentTransactions();
+
+                // Reset form
+                document.getElementById('quantity').value = 1;
+                document.getElementById('notes').value = '';
+
+                alert(`✅ ${type === 'in' ? 'Added' : 'Sold'} ${quantity} ${item.unit} of ${item.name}\nNew stock: ${item.currentStock} ${item.unit}\n${type === 'out' ? `Total: ${formatKSH(item.price * quantity)}` : ''}`);
+            }
+
+            // Load recent transactions
+            function loadRecentTransactions() {
+                const recentDiv = document.getElementById('recentTransactions');
+                const recent = stockDB.transactions.slice(0, 10);
+
+                if (recent.length === 0) {
+                    recentDiv.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No transactions yet</p>';
+                    return;
+                }
+
+                recentDiv.innerHTML = recent.map(t => `
+                <div style="margin: 10px 0; padding: 12px; border-left: 4px solid ${t.type === 'in' ? '#00b894' : '#e17055'}; background: white; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${t.itemName}</strong>
+                        <span style="color: ${t.type === 'in' ? '#00b894' : '#e17055'};">
+                            ${t.type === 'in' ? '📥' : '📤'} ${t.quantity}
+                        </span>
+                    </div>
+                    <div style="color: #666; font-size: 0.9em;">
+                        ${t.type === 'out' ? `Total: ${formatKSH(t.total)}` : 'Stock added'}
+                    </div>
+                    <div style="color: #888; font-size: 0.8em; margin-top: 5px;">
+                        ${new Date(t.date).toLocaleString()}
+                    </div>
+                    ${t.notes ? `<div style="color: #666; font-size: 0.85em; margin-top: 5px;">📝 ${t.notes}</div>` : ''}
+                </div>
+            `).join('');
+            }
+
+            // ADD NEW ITEM FUNCTION
+            function addNewItem() {
+                const name = document.getElementById('newItemName').value.trim();
+                const category = document.getElementById('newItemCategory').value;
+                const color = document.getElementById('newItemColor').value;
+                const unit = document.getElementById('newItemUnit').value;
+                const price = parseFloat(document.getElementById('newItemPrice').value);
+                const stock = parseInt(document.getElementById('newItemStock').value);
+                const minStock = parseInt(document.getElementById('newItemMinStock').value);
+                const reorderQty = parseInt(document.getElementById('newItemReorderQty').value);
+                const supplier = document.getElementById('newItemSupplier').value.trim();
+
+                // Validation
+                if (!name) {
+                    alert('❌ Please enter item name');
+                    return;
+                }
+
+                if (price < 0) {
+                    alert('❌ Price cannot be negative');
+                    return;
+                }
+
+                if (stock < 0) {
+                    alert('❌ Stock cannot be negative');
+                    return;
+                }
+
+                if (minStock < 0) {
+                    alert('❌ Minimum stock cannot be negative');
+                    return;
+                }
+
+                if (reorderQty < 1) {
+                    alert('❌ Reorder quantity must be at least 1');
+                    return;
+                }
+
+                // Create unique ID
+                const id = `${category}-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+
+                // Add new item
+                const newItem = {
+                    id: id,
+                    name: name,
+                    category: category,
+                    color: color,
+                    currentStock: stock,
+                    minStock: minStock,
+                    reorderQty: reorderQty,
+                    unit: unit,
+                    price: price,
+                    supplier: supplier || 'Not specified'
+                };
+
+                stockDB.products.push(newItem);
+
+                // Save data
+                saveData();
+
+                // Reset form
+                document.getElementById('newItemName').value = '';
+                document.getElementById('newItemStock').value = 0;
+                document.getElementById('newItemPrice').value = 100;
+                document.getElementById('newItemMinStock').value = 5;
+                document.getElementById('newItemReorderQty').value = 10;
+                document.getElementById('newItemSupplier').value = '';
+
+                // Update UI
+                updateDashboard();
+                loadStockList();
+                populateItemSelect();
+
+                alert(`✅ Added new item: ${name}\nInitial Stock: ${stock} ${unit}\nPrice: ${formatKSH(price)}\n\nGo to "Stock" tab to see your new item!`);
+
+                // Switch to stock tab
+                showTab('stock');
+            }
+
+            // Fill template for quick add
+            function fillTemplate(type) {
+                let name, category, color, unit, price, minStock, reorderQty;
+
+                switch (type) {
+                    case 'ribbon':
+                        name = 'New Ribbon Color';
+                        category = 'ribbon';
+                        color = '#1a73e8';
+                        unit = 'roll';
+                        price = 250;
+                        minStock = 5;
+                        reorderQty = 10;
+                        break;
+                    case 'balloon':
+                        name = 'New Balloon Type';
+                        category = 'balloon';
+                        color = '#FFD700';
+                        unit = 'pack';
+                        price = 450;
+                        minStock = 8;
+                        reorderQty = 15;
+                        break;
+                    case 'card':
+                        name = 'New Card Type';
+                        category = 'card';
+                        color = '#FF69B4';
+                        unit = 'each';
+                        price = 125;
+                        minStock = 15;
+                        reorderQty = 25;
+                        break;
+                }
+
+                document.getElementById('newItemName').value = name;
+                document.getElementById('newItemCategory').value = category;
+                document.getElementById('newItemColor').value = color;
+                document.getElementById('newItemUnit').value = unit;
+                document.getElementById('newItemPrice').value = price;
+                document.getElementById('newItemMinStock').value = minStock;
+                document.getElementById('newItemReorderQty').value = reorderQty;
+
+                alert(`📝 Template filled for ${type}. Adjust details as needed.`);
+            }
+            // Populate edit item dropdown
+            function populateEditItemSelect() {
+                const select = document.getElementById('editItemSelect');
+                select.innerHTML = '<option value="">-- Select Item to Edit --</option>' +
+                    stockDB.products.map(item => `
+            <option value="${item.id}">${item.name} (${formatKSH(item.price)} each)</option>
+        `).join('');
+            }
+
+            // Load item for editing
+            function loadItemForEdit() {
+                const itemId = document.getElementById('editItemSelect').value;
+                const formDiv = document.getElementById('editItemForm');
+                const statsDiv = document.getElementById('itemStats');
+
+                if (!itemId) {
+                    formDiv.style.display = 'none';
+                    statsDiv.innerHTML = '<p>Select an item to see statistics</p>';
+                    return;
+                }
+
+                const item = stockDB.products.find(p => p.id === itemId);
+                if (!item) return;
+
+                // Fill form
+                document.getElementById('editItemId').value = item.id;
+                document.getElementById('editItemName').value = item.name;
+                document.getElementById('editItemCategory').value = item.category;
+                document.getElementById('editItemColor').value = item.color;
+                document.getElementById('editItemUnit').value = item.unit;
+                document.getElementById('editItemPrice').value = item.price;
+                document.getElementById('editItemStock').value = item.currentStock;
+                document.getElementById('editItemMinStock').value = item.minStock;
+                document.getElementById('editItemReorderQty').value = item.reorderQty;
+                document.getElementById('editItemSupplier').value = item.supplier || '';
+
+                // Show form
+                formDiv.style.display = 'block';
+
+                // Update statistics
+                updateItemStats(item);
+            }
+
+            // Update item statistics
+            function updateItemStats(item) {
+                const statsDiv = document.getElementById('itemStats');
+
+                // Calculate item value
+                const itemValue = item.currentStock * item.price;
+
+                // Find transactions for this item
+                const itemTransactions = stockDB.transactions.filter(t => t.itemId === item.id);
+                const soldCount = itemTransactions.filter(t => t.type === 'out').reduce((sum, t) => sum + t.quantity, 0);
+                const boughtCount = itemTransactions.filter(t => t.type === 'in').reduce((sum, t) => sum + t.quantity, 0);
+
+                statsDiv.innerHTML = `
+        <h4>📈 ${item.name} Statistics</h4>
+        <p><strong>Total Value:</strong> ${formatKSH(itemValue)}</p>
+        <p><strong>Sold:</strong> ${soldCount} ${item.unit}</p>
+        <p><strong>Purchased:</strong> ${boughtCount} ${item.unit}</p>
+        <p><strong>Stock Status:</strong> ${item.currentStock <= item.minStock ? '⚠️ Low Stock' : '✅ Good'}</p>
+        <p><strong>Reorder When:</strong> Below ${item.minStock} ${item.unit}</p>
+        <p><strong>Last Transaction:</strong> ${itemTransactions.length > 0 ? new Date(itemTransactions[0].date).toLocaleDateString() : 'Never'}</p>
+    `;
+            }
+
+            // Update item details
+            function updateItem() {
+                const itemId = document.getElementById('editItemId').value;
+                const name = document.getElementById('editItemName').value.trim();
+                const category = document.getElementById('editItemCategory').value;
+                const color = document.getElementById('editItemColor').value;
+                const unit = document.getElementById('editItemUnit').value;
+                const price = parseFloat(document.getElementById('editItemPrice').value);
+                const stock = parseInt(document.getElementById('editItemStock').value);
+                const minStock = parseInt(document.getElementById('editItemMinStock').value);
+                const reorderQty = parseInt(document.getElementById('editItemReorderQty').value);
+                const supplier = document.getElementById('editItemSupplier').value.trim();
+
+                // Validation
+                if (!name) {
+                    alert('❌ Please enter item name');
+                    return;
+                }
+
+                if (price < 0) {
+                    alert('❌ Price cannot be negative');
+                    return;
+                }
+
+                if (stock < 0) {
+                    alert('❌ Stock cannot be negative');
+                    return;
+                }
+
+                if (minStock < 0) {
+                    alert('❌ Minimum stock cannot be negative');
+                    return;
+                }
+
+                if (reorderQty < 1) {
+                    alert('❌ Reorder quantity must be at least 1');
+                    return;
+                }
+
+                // Find item index
+                const itemIndex = stockDB.products.findIndex(p => p.id === itemId);
+                if (itemIndex === -1) {
+                    alert('❌ Item not found');
+                    return;
+                }
+
+                // Update item
+                stockDB.products[itemIndex] = {
+                    ...stockDB.products[itemIndex],
+                    name: name,
+                    category: category,
+                    color: color,
+                    unit: unit,
+                    price: price,
+                    currentStock: stock,
+                    minStock: minStock,
+                    reorderQty: reorderQty,
+                    supplier: supplier || 'Not specified'
+                };
+
+                // Save data
+                saveData();
+
+                // Update UI
+                updateDashboard();
+                loadStockList();
+                populateItemSelect();
+                populateEditItemSelect();
+                updateItemStats(stockDB.products[itemIndex]);
+
+                alert(`✅ Updated item: ${name}\nNew Price: ${formatKSH(price)}\nNew Stock: ${stock} ${unit}`);
+            }
+
+            // Delete item
+            function deleteItem() {
+                const itemId = document.getElementById('editItemId').value;
+                const itemName = document.getElementById('editItemName').value;
+
+                if (!itemId) return;
+
+                if (confirm(`⚠️ DELETE "${itemName}"?\n\nThis will permanently remove the item from your inventory.\nThis action cannot be undone!`)) {
+                    // Remove item
+                    stockDB.products = stockDB.products.filter(p => p.id !== itemId);
+
+                    // Save data
+                    saveData();
+
+                    // Update UI
+                    updateDashboard();
+                    loadStockList();
+                    populateItemSelect();
+                    populateEditItemSelect();
+
+                    // Clear form
+                    document.getElementById('editItemForm').style.display = 'none';
+                    document.getElementById('editItemSelect').value = '';
+                    document.getElementById('itemStats').innerHTML = '<p>Select an item to see statistics</p>';
+
+                    alert(`✅ Deleted item: ${itemName}`);
+                }
+            }
+
+            // Edit item directly from stock list
+            function editItem(itemId) {
+                // Switch to edit tab
+                showTab('edititem');
+
+                // Find the item
+                const item = stockDB.products.find(p => p.id === itemId);
+                if (!item) return;
+
+                // Set the dropdown value
+                document.getElementById('editItemSelect').value = itemId;
+
+                // Trigger load
+                loadItemForEdit();
+            }
+
+            // Increase all prices by percentage
+            function increaseAllPrices() {
+                const percentage = parseFloat(document.getElementById('priceIncrease').value);
+
+                if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+                    alert('❌ Please enter a valid percentage (0-100)');
+                    return;
+                }
+
+                if (confirm(`Increase ALL prices by ${percentage}%?\nThis will affect ${stockDB.products.length} items.`)) {
+                    let changes = [];
+
+                    stockDB.products.forEach(item => {
+                        const oldPrice = item.price;
+                        const newPrice = Math.round(item.price * (1 + percentage / 100));
+                        item.price = newPrice;
+                        changes.push(`${item.name}: ${formatKSH(oldPrice)} → ${formatKSH(newPrice)}`);
+                    });
+
+                    saveData();
+                    updateDashboard();
+                    loadStockList();
+                    populateItemSelect();
+                    populateEditItemSelect();
+
+                    alert(`✅ Increased all prices by ${percentage}%\n\nChanges made:\n${changes.slice(0, 5).join('\n')}${changes.length > 5 ? `\n...and ${changes.length - 5} more items` : ''}`);
+                }
+            }
+
+            // Update prices for specific category
+            function updateCategoryPrices() {
+                const category = document.getElementById('updateCategory').value;
+                const newPrice = parseFloat(document.getElementById('newCategoryPrice').value);
+
+                if (isNaN(newPrice) || newPrice < 0) {
+                    alert('❌ Please enter a valid price');
+                    return;
+                }
+
+                const categoryItems = stockDB.products.filter(p => p.category === category);
+
+                if (categoryItems.length === 0) {
+                    alert(`❌ No ${category} items found`);
+                    return;
+                }
+
+                if (confirm(`Set ALL ${category} prices to ${formatKSH(newPrice)}?\nThis will affect ${categoryItems.length} items.`)) {
+                    let changes = [];
+
+                    stockDB.products.forEach(item => {
+                        if (item.category === category) {
+                            const oldPrice = item.price;
+                            item.price = newPrice;
+                            changes.push(`${item.name}: ${formatKSH(oldPrice)} → ${formatKSH(newPrice)}`);
+                        }
+                    });
+
+                    saveData();
+                    updateDashboard();
+                    loadStockList();
+                    populateItemSelect();
+                    populateEditItemSelect();
+
+                    alert(`✅ Updated ${category} prices\n\nChanges made:\n${changes.join('\n')}`);
+                }
+            }
+
+            // Update tab switching to include edit tab
+            function showTab(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Remove active from buttons
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Show selected tab
+                document.getElementById(tabName).classList.add('active');
+
+                // Make button active
+                event.target.classList.add('active');
+
+                // Update content
+                if (tabName === 'dashboard') {
+                    updateDashboard();
+                } else if (tabName === 'stock') {
+                    loadStockList();
+                    populateItemSelect();
+                } else if (tabName === 'add') {
+                    populateItemSelect();
+                    loadRecentTransactions();
+                } else if (tabName === 'newitem') {
+                    // Nothing special
+                } else if (tabName === 'edititem') {
+                    populateEditItemSelect();
+                } else if (tabName === 'reorder') {
+                    updateReorderList();
+                }
+            }
+
+            // Update reorder list
+            function updateReorderList() {
+                const reorderItems = stockDB.products.filter(item => item.currentStock <= item.minStock);
+                const reorderDiv = document.getElementById('reorderList');
+
+                if (reorderItems.length === 0) {
+                    reorderDiv.innerHTML = '<div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 10px;"><h3>✅ All items are well stocked!</h3><p>No reorders needed at this time.</p></div>';
+                    return;
+                }
+
+                reorderDiv.innerHTML = `
+                <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #e17055; margin-bottom: 15px;">⚠️ Items Needing Reorder (${reorderItems.length})</h3>
+                    ${reorderItems.map(item => `
+                        <div class="reorder-item">
+                            <div>
+                                <span class="color-indicator" style="background:${item.color}"></span>
+                                <strong>${item.name}</strong>
+                                <br><small>${item.supplier || 'No supplier specified'}</small>
+                            </div>
+                            <div>Current: ${item.currentStock}</div>
+                            <div>Min: ${item.minStock}</div>
+                            <div>Order: ${item.reorderQty}</div>
+                            <div>${formatKSH(item.price)} each</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="background: #d4edda; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    <h4>📞 Recommended Action:</h4>
+                    <p>Call your suppliers to order the items marked above. Total estimated cost: <strong>${formatKSH(
+                    reorderItems.reduce((sum, item) => sum + (item.reorderQty * item.price), 0)
+                )}</strong></p>
+                </div>
+            `;
+            }
+
+            // Print reorder list
+            function printReorderList() {
+                const reorderItems = stockDB.products.filter(item => item.currentStock <= item.minStock);
+
+                if (reorderItems.length === 0) {
+                    alert('No items need reordering.');
+                    return;
+                }
+
+                const printContent = `
+                <html>
+                <head>
+                    <title>Reorder List - ${new Date().toLocaleDateString()}</title>
+                    <style>
+                        body { font-family: Arial; padding: 20px; }
+                        h1 { color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                        th { background: #f8f9fa; }
+                        .total { font-weight: bold; font-size: 1.2em; margin-top: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .footer { margin-top: 30px; font-size: 0.9em; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>🛍️ My Shop - Reorder List</h1>
+                        <p>Date: ${new Date().toLocaleDateString()} | Time: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                    
+                    <table>
+                        <tr>
+                            <th>Item</th>
+                            <th>Current</th>
+                            <th>Min</th>
+                            <th>Order Qty</th>
+                            <th>Price (KSH)</th>
+                            <th>Total (KSH)</th>
+                            <th>Supplier</th>
+                        </tr>
+                        ${reorderItems.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>${item.currentStock} ${item.unit}</td>
+                                <td>${item.minStock} ${item.unit}</td>
+                                <td>${item.reorderQty} ${item.unit}</td>
+                                <td>${item.price.toLocaleString()}</td>
+                                <td>${(item.reorderQty * item.price).toLocaleString()}</td>
+                                <td>${item.supplier || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    
+                    <div class="total">
+                        Total Order Value: KSH ${reorderItems.reduce((sum, item) => sum + (item.reorderQty * item.price), 0).toLocaleString()}
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Generated by My Shop Stock Manager</p>
+                        <p>Currency: Kenyan Shillings (KSH)</p>
+                    </div>
+                </body>
+                </html>
+            `;
+
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                printWindow.print();
+            }
+
+            // Export data
+            function exportData() {
+                const dataStr = JSON.stringify(stockDB, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                const exportName = `my-shop-stock-${new Date().toISOString().split('T')[0]}.json`;
+
+                const link = document.createElement('a');
+                link.setAttribute('href', dataUri);
+                link.setAttribute('download', exportName);
+                link.click();
+
+                document.getElementById('lastBackup').textContent = new Date().toLocaleString();
+                alert('✅ Data exported successfully!');
+            }
+
+            // Import data
+            function importData() {
+                document.getElementById('importFile').click();
+            }
+
+            // Handle file import
+            document.getElementById('importFile').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (confirm('Replace current data with imported data?')) {
+                            stockDB = imported;
+                            if (!stockDB.currency) stockDB.currency = 'KSH';
+                            saveData();
+                            updateDashboard();
+                            loadStockList();
+                            populateItemSelect();
+                            alert('✅ Data imported successfully!');
+                        }
+                    } catch (error) {
+                        alert('❌ Error importing data. Invalid file format.');
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Clear data
+            function clearData() {
+                if (confirm('⚠️ Clear ALL data? This will remove all items and transactions!')) {
+                    localStorage.removeItem('myShopStockKSH');
+                    location.reload();
+                }
+            }
+
+            // Initialize
+            document.addEventListener('DOMContentLoaded', function () {
+                loadData();
+                updateDashboard();
+                loadStockList();
+                populateItemSelect();
+                loadRecentTransactions();
+                updateReorderList();
+
+                // Auto-save every 30 seconds
+                setInterval(saveData, 30000);
+
+                // Update connection status
+                function updateConnectionStatus() {
+                    const status = navigator.onLine ? '✅ Online' : '⚠️ Offline';
+                    document.getElementById('connectionStatus').textContent = status;
+                }
+
+                updateConnectionStatus();
+                window.addEventListener('online', updateConnectionStatus);
+                window.addEventListener('offline', updateConnectionStatus);
+            });
+        </script>
+</body>
+
+</html>
